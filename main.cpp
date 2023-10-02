@@ -22,7 +22,7 @@ struct digitalWallet
 
 // Function prototype
 void createWallet(digitalWallet* walletArray, int &walletCount);
-void addFunds();
+void addFunds(digitalWallet *walletArray,string walletID, int pin, double amount, int walletCount);
 void withdrawFunds();
 void generateRandomReference();
 void transferFunds();
@@ -36,6 +36,7 @@ int main()
     int walletCount = 0;
     digitalWallet newWallet[2];
     digitalWallet* pNewWallet = newWallet;
+    double amount;
 
     // Display welcome Message
     printf("%46s","Welcome To The Digital Wallet System\n");
@@ -54,7 +55,7 @@ int main()
         printf("|_______________________________________________________|\n");
 
         // user input for menu selection
-        cout << "\nEnter Menu Number: ";
+        printf("|%15s", "Menu Number: ");
         cin >> sUserChoice;
 
         // check if the value entered is a string
@@ -79,7 +80,21 @@ int main()
                 createWallet(pNewWallet,walletCount);
                 break;
             case 2:
-                addFunds();
+                // user input for account id
+                cout << "\nEnter Account ID: ";
+                cin.ignore();
+                cin >> accountID;
+
+                // user input for wallet pin
+                cout << "Enter Wallet Pin: ";
+                cin >> pin;
+
+                // user input for amount to fund
+                cout << "Enter Wallet Amount: R ";
+                cin >> amount;
+
+                // function call for adding funds
+                addFunds(pNewWallet, accountID, pin, amount, walletCount);
                 break;
             case 3:
                 withdrawFunds();
@@ -89,7 +104,7 @@ int main()
                 break;
             case 5:
                 // user input for account id
-                cout << "Enter Account ID: ";
+                cout << "\nEnter Account ID: ";
                 cin.ignore();
                 cin >> accountID;
 
@@ -137,12 +152,70 @@ void createWallet(digitalWallet* walletArray, int &walletCount)
     // increment by one
     walletCount++;
 
-    cout << "Wallet Was Successfully Created.\n";
+    cout << "\nWallet Was Successfully Created.\n";
 }
 
 // function for adding funds to the wallet
-void addFunds()
+void addFunds(digitalWallet *walletArray,string walletID, int pin, double amount, int walletCount)
 {
+    // when the is no wallet
+    if(walletCount == 0)
+    {
+        cout << "\nWallet Not Found.\n";
+    }
+    else
+    {
+        // input validation for fund amount
+        if(amount < 0)
+        {
+            do
+            {
+                // error message for amount less than zero
+                cout << "Error! Enter a Positive Amount.\n";
+
+                // input for amount
+                cout << "Enter Amount: R ";
+                cin >> amount;
+
+            } while (amount < 0);
+        }
+        // search for the wallet using a loop
+        for(int i = 0; i < walletCount; i++)
+        {
+            if(walletArray[i].walletId == walletID)
+            {
+                // incremet amount
+                walletArray[i].balance += amount;
+
+                // display a success message
+                cout << "\nFunds added successfully. New balance: R " << walletArray[i].balance << "\n";
+
+                // break outside the loop
+                break;
+            }
+            else if(walletArray[i].walletId == walletID && walletArray[i].pin != pin)
+            {
+                do
+                {
+                    // display a error message for incorrect pin
+                    cout << "\nIncorrect Pin. Access denied.\n";
+
+                    // user input for pin
+                    cout << "Enter Pin: ";
+                    cin >> pin;
+
+                } while(pin != walletArray[i].pin);
+
+
+                // break outside the loop
+                break;
+            }
+            else
+            {
+                cout << "\nWallet Not Found.\n";
+            }
+        }
+    }
 }
 
 // function for withdrawal of funds from wallet
