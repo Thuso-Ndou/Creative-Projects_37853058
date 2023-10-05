@@ -215,21 +215,32 @@ void addFunds(digitalWallet *walletArray,string walletID, int pin, double amount
 
             } while (amount < 0);
         }
+
+        // boolean variable for wallet id search
+        bool isFound = false;
+
+        // declare a variable for index number for search
+        int index = 0;
+
         // search for the wallet using a loop
         for(int i = 0; i < walletCount; i++)
         {
             if(walletArray[i].walletId == walletID)
             {
-                // incremet amount
-                walletArray[i].balance += amount;
+                // set is found to true
+                isFound = true;
 
-                // display a success message
-                cout << "\nFunds added successfully. New balance: R " << walletArray[i].balance << "\n";
+                // index number
+                index = i;
 
                 // break outside the loop
                 break;
             }
-            else if(walletArray[i].walletId == walletID && walletArray[i].pin != pin)
+        }
+
+        if(isFound)
+        {
+            if(walletArray[index].pin != pin)
             {
                 do
                 {
@@ -240,16 +251,20 @@ void addFunds(digitalWallet *walletArray,string walletID, int pin, double amount
                     cout << "Enter Pin: ";
                     cin >> pin;
 
-                } while(pin != walletArray[i].pin);
+                } while(pin != walletArray[index].pin);
 
+            }
 
-                // break outside the loop
-                break;
-            }
-            else
-            {
-                cout << "\nWallet Not Found.\n";
-            }
+            // incremet amount
+            walletArray[index].balance += amount;
+
+            // display a success message
+            cout << "\nFunds added successfully. New balance: R " << walletArray[index].balance << "\n";
+
+        }
+        else
+        {
+            cout << "\nWallet Not Found.\n";
         }
     }
 }
@@ -270,7 +285,7 @@ void withdrawFunds(digitalWallet* walletArray, string walletID, int pin, double 
             do
             {
                 // error message for amount less than zero
-                cout << "Error! Enter a Positive Amount.\n";
+                cout << "Invalid Amount.\n";
 
                 // input for amount
                 cout << "Enter Amount: R ";
@@ -278,38 +293,33 @@ void withdrawFunds(digitalWallet* walletArray, string walletID, int pin, double 
 
             } while (amount < 0);
         }
+
+        // declare variable for is found
+        bool isFound = false;
+
+        // declare variable for index number
+        int index = 0;
+
         // search for the wallet using a loop
         for(int i = 0; i < walletCount; i++)
         {
             if(walletArray[i].walletId == walletID)
             {
-                if(walletArray[i].balance >= amount)
-                {
-                    // declare withdrawal reference variable
-                    int referenceNumber;
+                // set is found to true
+                isFound = true;
 
-                    // assign a random reference number
-                    referenceNumber = generateRandomReference();
+                // assign the index number
+                index = i;
 
-                    // incremet amount
-                    walletArray[i].balance -= amount;
-
-                    // display a success message
-                    cout << "\nWithdrawal successfully. New balance: R " << walletArray[i].balance << "\n";
-
-                    // display the reference number
-                    cout << "\nWithdrawal reference number: " << referenceNumber << endl;
-
-                    // break outside the loop
+                // break outside the loop
                 break;
-                }
-                else
-                {
-                    //error message fr invalid amount
-                    cout << "\nInsufficient Funds.\n";
-                }
+
             }
-            else if(walletArray[i].walletId == walletID && walletArray[i].pin != pin)
+        }
+
+        if(isFound)
+        {
+            if(walletArray[index].pin != pin)
             {
                 do
                 {
@@ -320,16 +330,37 @@ void withdrawFunds(digitalWallet* walletArray, string walletID, int pin, double 
                     cout << "Enter Pin: ";
                     cin >> pin;
 
-                } while(pin != walletArray[i].pin);
-
-
-                // break outside the loop
-                break;
+                } while(pin != walletArray[index].pin);
             }
             else
             {
-                cout << "\nWallet Not Found.\n";
+                if(walletArray[index].balance >= amount)
+                {
+                    // declare withdrawal reference variable
+                    int referenceNumber;
+
+                    // assign a random reference number
+                    referenceNumber = generateRandomReference();
+
+                    // incremet amount
+                    walletArray[index].balance -= amount;
+
+                    // display a success message
+                    cout << "\nWithdrawal successfully. New balance: R " << walletArray[index].balance << "\n";
+
+                    // display the reference number
+                    cout << "\nWithdrawal reference number: " << referenceNumber << endl;
+                }
+                else
+                {
+                    //error message fr invalid amount
+                    cout << "\nInsufficient Funds.\n";
+                }
             }
+        }
+        else
+        {
+            cout << "\nWallet Not Found.\n";
         }
     }
 }
@@ -350,63 +381,95 @@ int generateRandomReference()
 // Function to transfer funds to another wallet
 void transferFunds(digitalWallet* walletArray, string senderWallet, int senderPin, int walletCount,string recipientWallet, double amount)
 {
+    // declare a boolean variable
+    bool isFound = false;
+
+    //declare variable for index number
+    int index = 0;
+    int indexRecipient = 0;
+
     // search for the wallet using a loop
-        for(int i = 0; i < walletCount; i++)
+    for(int i = 0; i < walletCount; i++)
+    {
+        if(walletArray[i].walletId == senderWallet)
         {
-            if(walletArray[i].walletId == senderWallet && walletArray[i].pin == senderPin)
+            //set is found to true
+            isFound = true;
+
+            //index number
+            index = i;
+
+            //break out the loop
+            break;
+        }
+    }
+
+    if(isFound)
+    {
+        if(walletArray[index].pin != senderPin)
+        {
+            do
             {
-                if(walletArray[i].pin != senderPin)
+                // display a error message for incorrect pin
+                cout << "\nIncorrect Pin. Access denied.\n";
+
+                // user input for pin
+                cout << "Enter Pin: ";
+                cin >> senderPin;
+
+            } while(senderPin != walletArray[index].pin);
+        }
+        else
+        {
+            // boolean variable for recipient wallet
+            bool isAvailable = false;
+
+            //search for recipient wallet id
+            for(int j = 0; j < walletCount; j++)
+            {
+                if(recipientWallet == walletArray[j].walletId)
                 {
-                    do
-                    {
-                        // display a error message for incorrect pin
-                        cout << "\nIncorrect Pin. Access denied.\n";
+                    //set is available to true
+                    isAvailable = true;
 
-                        // user input for pin
-                        cout << "Enter Pin: ";
-                        cin >> senderPin;
+                    //asign index value to recipient index
+                    indexRecipient = j;
 
-                    } while(senderPin != walletArray[i].pin);
-                }
-
-                //search for recipient wallet id
-                for(int j = 0; j < walletCount; j++)
-                {
-                    if(recipientWallet == walletArray[j].walletId)
-                    {
-                        if(walletArray[i].balance >= amount)
-                        {
-                            // decrement sender wallet balance by amount
-                            walletArray[i].balance -= amount;
-
-                            // increment recipient balance by 1
-                            walletArray[j].balance += amount;
-
-                            // display success message
-                            cout << "Transfer Successful. New Balance: R" << walletArray[i].balance << endl;
-
-                            //break of the loop
-                            break;
-                        }
-                        else
-                        {
-                            // display an insufficient funds message
-                            cout << "\nInsufficient Funds.\n";
-                        }
-                    }
-                    else
-                    {
-                        // display message showing recipient not found
-                        cout << "\nRecipient Wallet Not Found.\n";
-                    }
+                    // break out of the loop
+                    break;
                 }
             }
 
+            if(isAvailable)
+            {
+                if(walletArray[index].balance >= amount)
+                {
+                    // decrement sender wallet balance by amount
+                    walletArray[index].balance -= amount;
+
+                    // increment recipient balance by 1
+                    walletArray[indexRecipient].balance += amount;
+
+                    // display success message
+                    cout << "Transfer Successful. New Balance: R" << walletArray[index].balance << endl;
+                }
+                else
+                {
+                    // display an insufficient funds message
+                    cout << "\nInsufficient Funds.\n";
+                }
+            }
             else
             {
-                cout << "\nWallet Not Found.\n";
+                // display message showing recipient not found
+                cout << "\nRecipient Wallet Not Found.\n";
             }
         }
+    }
+    else
+    {
+        cout << "\nWallet Not Found.\n";
+    }
 }
 
 // Function to display wallet balance
@@ -415,50 +478,44 @@ void viewBalance(digitalWallet* walletArray,string accountId, int pin, int walle
     // declare a bool variable to work as a flag value
     bool isFound = false;
 
+    //declare variable for index number
+    int index = 0;
+
     for(int i = 0; i < walletCount; i++)
     {
         if(accountId == walletArray[i].walletId)
         {
-            // when the wallet is found and the pin matches
-            if(pin == walletArray[i].pin)
-            {
-                // display the balance
-                printf("Balance: R%.2f", walletArray[i].balance);
+            // set is found to true
+            isFound = true;
 
-                // set is found to true
-                isFound = true;
+            // assign index
+            index = i;
 
-                // print an empty line
-                printf("\n");
-
-                // break of the loop
-                break;
-            }
-            // when the wallet is found but the pin does not match
-            else
-            {
-                do
-                {
-                    // prompt the pin again
-                    cout << "Invalid Pin. Enter Again: ";
-                    cin >> pin;
-
-                } while(pin != walletArray[i].pin);
-
-                // display the balance
-                printf("Balance: R%.2f", walletArray[i].balance);
-
-                // set is found to true
-                isFound = true;
-
-                // break out of the loop
-                break;
-            }
+            // break of the loop
+            break;
         }
     }
 
-    // if the wallet is not found display an error message
-    if(!isFound)
+    if(isFound)
+    {
+        if(pin != walletArray[index].pin)
+        {
+            // when a wrong pin is entered
+            do
+            {
+                // prompt the pin again
+                cout << "Invalid Pin. Enter Again: ";
+                cin >> pin;
+
+            } while(pin != walletArray[index].pin);
+        }
+        else
+        {
+            // display the balance
+            printf("Balance: R%.2f\n", walletArray[index].balance);
+        }
+    }
+    else
     {
         printf("Wallet Not Found\n");
     }
