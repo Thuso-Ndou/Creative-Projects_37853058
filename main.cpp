@@ -372,7 +372,7 @@ int generateRandomReference()
     int randomNumber;
 
     // generate a random number
-    randomNumber = 1000000000 + rand() % 9999999999;
+    randomNumber = rand() % 10000000000 ;
 
     // return the generated number
     return randomNumber;
